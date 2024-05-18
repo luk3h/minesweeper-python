@@ -1,6 +1,6 @@
 import pygame
 import random
-print("hello")
+
 # Initialise Pygame
 pygame.init()
 pygame.display.set_caption('Grid Clicker')
@@ -8,8 +8,10 @@ a = pygame.image.load('sweepericon.ico')
 pygame.display.set_icon(a)
 
 # Constants
-windheight = 400
-windwidth = 400
+windGridheight = 400
+wingGridwidth = 400
+windowlength = 650
+windowheight = 400
 blocksize = 20
 grey = (200, 200, 200)
 black = (0, 0, 0)
@@ -22,18 +24,18 @@ score = 0
 num_targets = 80
 
 # Setup the display
-screen = pygame.display.set_mode((windheight, windwidth))
+screen = pygame.display.set_mode((windowlength, windowheight))
 clock = pygame.time.Clock()
 
 running = True
 
-grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
-adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
-left_clicked = [[False for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
+grid = [[grey for _ in range(wingGridwidth // blocksize)] for _ in range(windGridheight // blocksize)]
+adjacent_counts = [[0 for _ in range(wingGridwidth // blocksize)] for _ in range(windGridheight // blocksize)]
+left_clicked = [[False for _ in range(wingGridwidth // blocksize)] for _ in range(windGridheight // blocksize)]
 
 def drawGrid(): # Creates a grid
-    for x in range(0, windheight, blocksize):
-        for y in range(0, windwidth, blocksize):
+    for x in range(0, windGridheight, blocksize):
+        for y in range(0, wingGridwidth, blocksize):
             rect = pygame.Rect(x, y, blocksize, blocksize)
             colour = grid[y // blocksize][x // blocksize]
             pygame.draw.rect(screen, colour, rect)
@@ -52,22 +54,20 @@ def count_adjacent_targets(x, y):
             if dx == 0 and dy == 0:
                 continue
             nx, ny = x + dx, y + dy
-            if 0 <= nx < windwidth // blocksize and 0 <= ny < windheight // blocksize:
+            if 0 <= nx < wingGridwidth // blocksize and 0 <= ny < windGridheight // blocksize:
                 if (nx, ny) in targets:
                     count += 1
     return count
 
 def reveal_square(x, y):
-    if not (0 <= x < windwidth // blocksize and 0 <= y < windheight // blocksize):
+    if not (0 <= x < wingGridwidth // blocksize and 0 <= y < windGridheight // blocksize):
         return
     if left_clicked[y][x]:
         return
-    
     left_clicked[y][x] = True
     adjacent_count = count_adjacent_targets(x, y)
     adjacent_counts[y][x] = adjacent_count
     grid[y][x] = green
-    
     if adjacent_count == 0:
         for dx in range(-1, 2):
             for dy in range(-1, 2):
@@ -76,13 +76,13 @@ def reveal_square(x, y):
 
 targets = []
 while len(targets) < num_targets:
-    targetX = random.randint(0, windwidth // blocksize - 1)
-    targetY = random.randint(0, windheight // blocksize - 1)
+    targetX = random.randint(0, wingGridwidth // blocksize - 1)
+    targetY = random.randint(0, windGridheight // blocksize - 1)
     target = (targetX, targetY)
-    # grid[targetY][targetX] = red
+    # Makes all mines display as red for testing
+    grid[targetY][targetX] = red
     if target not in targets:
         targets.append(target)
-
 print(f"target squares are {targets}")
 
 while running:
@@ -105,7 +105,6 @@ while running:
                         else:
                             reveal_square(gridX, gridY)
                             print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
-
                 elif event.button == RIGHT:
                     if grid[gridY][gridX] == green:
                         print("Not possible")   
@@ -117,6 +116,7 @@ while running:
                         grid[gridY][gridX] = grey
                         print("Target square unmarked!")
 
+                
     # Render game
     screen.fill(grey)
     drawGrid()
