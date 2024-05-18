@@ -28,6 +28,7 @@ screen = pygame.display.set_mode((windowlength, windowheight))
 clock = pygame.time.Clock()
 
 running = True
+gameend = False
 
 grid = [[grey for _ in range(wingGridwidth // blocksize)] for _ in range(windGridheight // blocksize)]
 adjacent_counts = [[0 for _ in range(wingGridwidth // blocksize)] for _ in range(windGridheight // blocksize)]
@@ -74,6 +75,11 @@ def reveal_square(x, y):
                 if dx != 0 or dy != 0:
                     reveal_square(x + dx, y + dy)
 
+def gamefailed():
+    if gameend == True:
+        screen.fill((0, 0, 0))
+        pygame.display.flip()
+
 targets = []
 while len(targets) < num_targets:
     targetX = random.randint(0, wingGridwidth // blocksize - 1)
@@ -101,7 +107,9 @@ while running:
                             grid[gridY][gridX] = red
                             print(f"Clicked on grid square ({gridX}, {gridY})")
                             print("Target square clicked! Closing game")
-                            running = False
+                            gameend = True
+
+
                         else:
                             reveal_square(gridX, gridY)
                             print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
@@ -119,6 +127,7 @@ while running:
     # Render game
     screen.fill(grey)
     drawGrid()
+    gamefailed()
 
     # flip() the display to put the work on the screen
     pygame.display.flip()
