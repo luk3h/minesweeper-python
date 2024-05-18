@@ -1,6 +1,6 @@
 import pygame
 import random
-
+print("hello")
 # Initialise Pygame
 pygame.init()
 pygame.display.set_caption('Grid Clicker')
