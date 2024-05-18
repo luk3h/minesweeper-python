@@ -94,7 +94,7 @@ while running:
             mouseX, mouseY = pygame.mouse.get_pos()
             gridX = mouseX // blocksize
             gridY = mouseY // blocksize
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if 0 <= gridX < wingGridwidth // blocksize and 0 <= gridY < windGridheight // blocksize:  # Boundary check
                 if event.button == LEFT:
                     if not left_clicked[gridY][gridX]:
                         if (gridX, gridY) in targets:
@@ -116,7 +116,6 @@ while running:
                         grid[gridY][gridX] = grey
                         print("Target square unmarked!")
 
-                
     # Render game
     screen.fill(grey)
     drawGrid()
