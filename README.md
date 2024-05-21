@@ -14,3 +14,7 @@ Score counter in main display
 Ability to replay without having to exit out of game and run code again
 
 Limited flag counter, only (number of targets) flags allowed
+
+Sound when clicking on mines, placing flags, removing flags etc.
+
+
