@@ -181,26 +181,21 @@ while running:
                 if not left_clicked[gridY][gridX]:
                     if (gridX, gridY) in targets:
                         grid[gridY][gridX] = red
-                        print(f"Clicked on grid square ({gridX}, {gridY})")
-                        print("Target square clicked! Closing game")
                         gamefailed()
                         break
                     else:
                         reveal_square(gridX, gridY)
-                        print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
             elif event.button == RIGHT:
                 if grid[gridY][gridX] == darkgrey:
                     print("Not possible to mark clicked square.")   
                 elif grid[gridY][gridX] != pink:
                     grid[gridY][gridX] = pink
-                    print("Target square marked!")
+                    print("Square marked!")
                     score += 1
-                    print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
         elif score == num_targets:
-            print(score)
             gamewon()
 
     # Render game
