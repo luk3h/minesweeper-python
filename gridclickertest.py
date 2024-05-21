@@ -11,15 +11,23 @@ pygame.display.set_icon(a)
 windheight = 400
 windwidth = 400
 blocksize = 20
+blue = (0, 0, 255)
+
 grey = (200, 200, 200)
 black = (0, 0, 0)
 red = (255, 0, 0)
-green = (0, 255, 0)
+green = (0, 128, 0)
 pink = (255, 192, 203)
+darkgrey = (169, 169, 169)
+kinddarkgrey = (180, 180, 180)
+darkblue = (0, 0, 128)
+darkred = (128, 0, 0)
+teal = (0, 128, 128)
+
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 80
+num_targets = 90
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -27,7 +35,13 @@ clock = pygame.time.Clock()
 pygame.font.init()
 
 # Default game font
-game_font = pygame.font.Font("assets\cmb10.ttf", 24)
+game_font = pygame.font.Font("assets/cmb10.ttf", 24)
+
+flag_image = pygame.image.load("assets/flag.png")
+flag_image = pygame.transform.scale(flag_image, (blocksize, blocksize))
+
+block_image = pygame.image.load("assets/block.png")
+block_image = pygame.transform.scale(block_image, (blocksize, blocksize))
 
 running = True
 first_click = True
@@ -36,20 +50,45 @@ grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight 
 adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 left_clicked = [[False for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 
-def drawGrid(): # Creates a grid
+def drawGrid():
     for x in range(0, windheight, blocksize):
         for y in range(0, windwidth, blocksize):
             rect = pygame.Rect(x, y, blocksize, blocksize)
             colour = grid[y // blocksize][x // blocksize]
             pygame.draw.rect(screen, colour, rect)
-            pygame.draw.rect(screen, black, rect, 1)
-            if grid[y // blocksize][x // blocksize] == green:
+            pygame.draw.rect(screen, kinddarkgrey, rect, 1)
+            if grid[y // blocksize][x // blocksize] == darkgrey:
                 count = adjacent_counts[y // blocksize][x // blocksize]
                 if count > 0:
+                    text_colour = get_count_colour(count)
                     font = pygame.font.Font(None, 24)
-                    text = font.render(str(count), True, black)
+                    text = font.render(str(count), True, text_colour)
                     screen.blit(text, (x + blocksize // 3, y + blocksize // 6))
+            elif grid[y // blocksize][x // blocksize] == pink:
+                screen.blit(flag_image, (x, y))
+            elif grid[y // blocksize][x // blocksize] == grey:
+                screen.blit(block_image, (x, y))
 
+def get_count_colour(count):
+    if count == 1:
+        return blue
+    elif count == 2:
+        return green
+    if count == 3:
+        return red
+    elif count == 4:
+        return darkblue
+    if count == 5:
+        return darkred
+    elif count == 6:
+        return teal
+    if count == 7:
+        return black
+    elif count == 8:
+        return grey
+    else:
+        return black
+    
 def count_adjacent_targets(x, y):
     count = 0
     for dx in range(-1, 2):
@@ -71,7 +110,7 @@ def reveal_square(x, y):
     left_clicked[y][x] = True
     adjacent_count = count_adjacent_targets(x, y)
     adjacent_counts[y][x] = adjacent_count
-    grid[y][x] = green
+    grid[y][x] = darkgrey
     
     if adjacent_count == 0:
         for dx in range(-1, 2):
@@ -91,18 +130,17 @@ def place_targets(exclude_x, exclude_y):
 
 def gamefailed():
     global running
-
     screen.fill(grey)
-
     text_surface = game_font.render("Game Over", True, black)
     text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
     screen.blit(text_surface, text_rect)
-
     pygame.display.flip()
     
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:  # Optionally, add a restart feature
                 running = False
 
 while running:
@@ -113,37 +151,35 @@ while running:
             mouseX, mouseY = pygame.mouse.get_pos()
             gridX = mouseX // blocksize
             gridY = mouseY // blocksize
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == LEFT:
-                    if first_click:
-                        place_targets(gridX, gridY)
-                        first_click = False
-                    if not left_clicked[gridY][gridX]:
-                        if (gridX, gridY) in targets:
-                            grid[gridY][gridX] = red
-                            print(f"Clicked on grid square ({gridX}, {gridY})")
-                            print("Target square clicked! Closing game")
-                            gamefailed()
-                            break
-                        else:
-                            reveal_square(gridX, gridY)
-                            print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
-
-                elif event.button == RIGHT:
-                    if grid[gridY][gridX] == green:
-                        print("Not possible to mark green square.")   
-                    elif grid[gridY][gridX] != pink:
-                        grid[gridY][gridX] = pink
-                        print("Target square marked!")
-                        score += 1
+            if event.button == LEFT:
+                if first_click:
+                    place_targets(gridX, gridY)
+                    first_click = False
+                if not left_clicked[gridY][gridX]:
+                    if (gridX, gridY) in targets:
+                        grid[gridY][gridX] = red
+                        print(f"Clicked on grid square ({gridX}, {gridY})")
+                        print("Target square clicked! Closing game")
+                        gamefailed()
+                        break
                     else:
-                        grid[gridY][gridX] = grey
-                        print("Target square unmarked!")
+                        reveal_square(gridX, gridY)
+                        print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
+
+            elif event.button == RIGHT:
+                if grid[gridY][gridX] == darkgrey:
+                    print("Not possible to mark clicked square.")   
+                elif grid[gridY][gridX] != pink:
+                    grid[gridY][gridX] = pink
+                    print("Target square marked!")
+                    score += 1
+                else:
+                    grid[gridY][gridX] = grey
+                    print("Target square unmarked!")
 
     # Render game
     screen.fill(grey)
     drawGrid()
-
     pygame.display.flip()
 
 pygame.quit()
