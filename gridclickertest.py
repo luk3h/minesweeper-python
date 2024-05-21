@@ -27,8 +27,7 @@ teal = (0, 128, 128)
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 5
-
+num_targets = 80
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -47,7 +46,6 @@ block_image = pygame.transform.scale(block_image, (blocksize, blocksize))
 
 running = True
 first_click = True
-
 
 grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
@@ -128,9 +126,11 @@ def place_targets(exclude_x, exclude_y):
         targetX = random.randint(0, windwidth // blocksize - 1)
         targetY = random.randint(0, windheight // blocksize - 1)
         target = (targetX, targetY)
+
         if target not in targets and target != (exclude_x, exclude_y):
             targets.append(target)
-
+            print(targets)
+            
 def gamefailed():
     global running
     screen.fill(grey)
@@ -174,6 +174,7 @@ while running:
             mouseX, mouseY = pygame.mouse.get_pos()
             gridX = mouseX // blocksize
             gridY = mouseY // blocksize
+            
             if event.button == LEFT:
                 if first_click:
                     place_targets(gridX, gridY)
@@ -186,15 +187,23 @@ while running:
                     else:
                         reveal_square(gridX, gridY)
             elif event.button == RIGHT:
+                if first_click:
+                    place_targets(gridX, gridY)
+                    first_click = False
                 if grid[gridY][gridX] == darkgrey:
                     print("Not possible to mark clicked square.")   
                 elif grid[gridY][gridX] != pink:
                     grid[gridY][gridX] = pink
                     print("Square marked!")
-                    score += 1
+                    if ((gridX, gridY)) in targets:
+                        score += 1
+                        print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
+                    if ((gridX, gridY)) in targets:
+                        score -= 1
+                        print(score)
         elif score == num_targets:
             gamewon()
 
