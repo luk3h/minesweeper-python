@@ -27,7 +27,8 @@ teal = (0, 128, 128)
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 90
+num_targets = 5
+
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -36,6 +37,7 @@ pygame.font.init()
 
 # Default game font
 game_font = pygame.font.Font("assets/cmb10.ttf", 24)
+score_font = pygame.font.Font("assets/cmb10.ttf", 16)
 
 flag_image = pygame.image.load("assets/flag.png")
 flag_image = pygame.transform.scale(flag_image, (blocksize, blocksize))
@@ -45,6 +47,7 @@ block_image = pygame.transform.scale(block_image, (blocksize, blocksize))
 
 running = True
 first_click = True
+
 
 grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
@@ -143,6 +146,26 @@ def gamefailed():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:  # Optionally, add a restart feature
                 running = False
 
+def gamewon():
+    global running, score
+    score_text = str(score)
+    screen.fill(grey)
+    text_surface = game_font.render("You Win!", True, black)
+    text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
+    score_image = score_font.render(f"Score : {score_text}", True, black)
+    score_rect = score_image.get_rect(center=(windwidth / 1.5, windheight / 1.5))
+    screen.blit(score_image, score_rect)
+    screen.blit(text_surface, text_rect)
+    pygame.display.flip()
+    
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:  # Optionally, add a restart feature
+                running = True
+
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -165,7 +188,6 @@ while running:
                     else:
                         reveal_square(gridX, gridY)
                         print(f"Revealed square ({gridX}, {gridY}) with {adjacent_counts[gridY][gridX]} adjacent target(s)")
-
             elif event.button == RIGHT:
                 if grid[gridY][gridX] == darkgrey:
                     print("Not possible to mark clicked square.")   
@@ -173,9 +195,13 @@ while running:
                     grid[gridY][gridX] = pink
                     print("Target square marked!")
                     score += 1
+                    print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
+        elif score == num_targets:
+            print(score)
+            gamewon()
 
     # Render game
     screen.fill(grey)
