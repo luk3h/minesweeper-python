@@ -11,8 +11,8 @@ pygame.display.set_icon(a)
 windheight = 400
 windwidth = 400
 blocksize = 20
-blue = (0, 0, 255)
 
+blue = (0, 0, 255)
 grey = (200, 200, 200)
 black = (0, 0, 0)
 red = (255, 0, 0)
@@ -27,7 +27,7 @@ teal = (0, 128, 128)
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 80
+num_targets = 30
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -129,7 +129,6 @@ def place_targets(exclude_x, exclude_y):
 
         if target not in targets and target != (exclude_x, exclude_y):
             targets.append(target)
-            print(targets)
             
 def gamefailed():
     global running
@@ -197,13 +196,11 @@ while running:
                     print("Square marked!")
                     if ((gridX, gridY)) in targets:
                         score += 1
-                        print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
                     if ((gridX, gridY)) in targets:
                         score -= 1
-                        print(score)
         elif score == num_targets:
             gamewon()
 
