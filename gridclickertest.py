@@ -11,8 +11,8 @@ pygame.display.set_icon(a)
 windheight = 400
 windwidth = 400
 blocksize = 20
-
 blue = (0, 0, 255)
+
 grey = (200, 200, 200)
 black = (0, 0, 0)
 red = (255, 0, 0)
@@ -27,7 +27,8 @@ teal = (0, 128, 128)
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 30
+num_targets = 80
+
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -46,6 +47,24 @@ block_image = pygame.transform.scale(block_image, (blocksize, blocksize))
 
 running = True
 first_click = True
+
+def start_game():
+    global running 
+    while running:
+        screen.fill(grey)
+        text_surface = game_font.render("Minesweeper", True, black)
+        text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
+        screen.blit(text_surface, text_rect)
+        button = pygame.draw.rect(screen,pink,[windwidth/3,windheight/1.5,160,60])
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False  
+            elif event.type == pygame.MOUSEBUTTONDOWN: 
+                if event.button == LEFT:
+                    if button.collidepoint(event.pos):
+                        print("Button clicked!")
+                        break
 
 grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
@@ -129,6 +148,7 @@ def place_targets(exclude_x, exclude_y):
 
         if target not in targets and target != (exclude_x, exclude_y):
             targets.append(target)
+            print(targets)
             
 def gamefailed():
     global running
@@ -196,17 +216,21 @@ while running:
                     print("Square marked!")
                     if ((gridX, gridY)) in targets:
                         score += 1
+                        print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
                     if ((gridX, gridY)) in targets:
                         score -= 1
+                        print(score)
         elif score == num_targets:
             gamewon()
 
     # Render game
-    screen.fill(grey)
+    start_game()
+    # screen.fill(grey)
     drawGrid()
     pygame.display.flip()
 
 pygame.quit()
+
