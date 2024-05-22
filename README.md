@@ -17,4 +17,4 @@ Limited flag counter, only (number of targets) flags allowed
 
 Sound when clicking on mines, placing flags, removing flags etc.
 
-
+If user left clicks on tile when it has a flag over it, remove the flag on the first click before allowing the user to left click the tile to reveal what is underneath
