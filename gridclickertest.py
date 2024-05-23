@@ -27,7 +27,8 @@ teal = (0, 128, 128)
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 2
+num_targets = 40
+
 
 # Setup the display
 screen = pygame.display.set_mode((windheight, windwidth))
@@ -50,6 +51,9 @@ first_click = True
 grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 left_clicked = [[False for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
+
+
+
 
 def drawGrid():
     for x in range(0, windheight, blocksize):
@@ -130,16 +134,20 @@ def place_targets(exclude_x, exclude_y):
         if target not in targets and target != (exclude_x, exclude_y):
             targets.append(target)
             
+def write(text, x, y, color="Black",):
+    text = game_font.render(text, 1, pygame.Color(color))
+    text_rect = text.get_rect(center=(windwidth // 2, y))
+    return text, text_rect
+
 def gamefailed():
     global running
     score_text = str(score)
+    targets_text = str(num_targets)
     screen.fill(grey)
-    text_surface = game_font.render("Game Over", True, black)
-    text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
-    score_image = score_font.render(f"Score : {score_text}", True, black)
-    score_rect = score_image.get_rect(center=(windwidth / 1.5, windheight / 1.5))
+    text, text_rect = write("You lose!", 10, 15)
+    score_image, score_rect = write(f"Mines marked : {score_text} / {targets_text}", 10, 45)
     screen.blit(score_image, score_rect)
-    screen.blit(text_surface, text_rect)
+    screen.blit(text, text_rect)
     pygame.display.flip()
     
     while running:
@@ -150,15 +158,14 @@ def gamefailed():
                 running = False
 
 def gamewon():
-    global running, score
+    global running
+    targets_text = str(num_targets)
     score_text = str(score)
     screen.fill(grey)
-    text_surface = game_font.render("You Win!", True, black)
-    text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
-    score_image = score_font.render(f"Score : {score_text}", True, black)
-    score_rect = score_image.get_rect(center=(windwidth / 1.5, windheight / 1.5))
+    text, text_rect = write("You win!", 10, 15)
+    score_image, score_rect = write(f"Mines marked : {score_text} / {targets_text}", 10, 45)
     screen.blit(score_image, score_rect)
-    screen.blit(text_surface, text_rect)
+    screen.blit(text, text_rect)
     pygame.display.flip()
     
     while running:
