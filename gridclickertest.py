@@ -20,14 +20,14 @@ green = (0, 128, 0)
 pink = (255, 192, 203)
 darkgrey = (169, 169, 169)
 kinddarkgrey = (180, 180, 180)
-darkblue = (0, 0, 128)
+purple = (50, 6, 128)
 darkred = (128, 0, 0)
 teal = (0, 128, 128)
 
 LEFT = 1
 RIGHT = 3
 score = 0
-num_targets = 40
+num_targets = 64
 
 
 # Setup the display
@@ -37,7 +37,7 @@ pygame.font.init()
 
 # Default game font
 game_font = pygame.font.Font("assets/cmb10.ttf", 24)
-score_font = pygame.font.Font("assets/cmb10.ttf", 16)
+
 
 flag_image = pygame.image.load("assets/flag.png")
 flag_image = pygame.transform.scale(flag_image, (blocksize, blocksize))
@@ -82,7 +82,7 @@ def get_count_colour(count):
     if count == 3:
         return red
     elif count == 4:
-        return darkblue
+        return purple
     if count == 5:
         return darkred
     elif count == 6:
@@ -174,7 +174,6 @@ def gamewon():
                 running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:  # Optionally, add a restart feature
                 running = True
-
 
 while running:
     for event in pygame.event.get():
