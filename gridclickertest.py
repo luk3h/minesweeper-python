@@ -8,89 +8,69 @@ a = pygame.image.load('assets/sweepericon.ico')
 pygame.display.set_icon(a)
 
 # Constants
-windHeight = 400
-windWidth = 400
-blockSize = 20
-blue = (0, 0, 255)
+windheight = 400
+windwidth = 400
+blocksize = 20
 
+blue = (0, 0, 255)
 grey = (200, 200, 200)
 black = (0, 0, 0)
 red = (255, 0, 0)
 green = (0, 128, 0)
 pink = (255, 192, 203)
-darkGrey = (169, 169, 169)
-kindaDarkGrey = (180, 180, 180)
-darkBlue = (0, 0, 128)
-darkRed = (128, 0, 0)
+darkgrey = (169, 169, 169)
+kinddarkgrey = (180, 180, 180)
+darkblue = (0, 0, 128)
+darkred = (128, 0, 0)
 teal = (0, 128, 128)
 
 LEFT = 1
 RIGHT = 3
 score = 0
-numTargets = 80
-
+num_targets = 2
 
 # Setup the display
-screen = pygame.display.set_mode((windHeight, windWidth))
+screen = pygame.display.set_mode((windheight, windwidth))
 clock = pygame.time.Clock()
 pygame.font.init()
 
 # Default game font
-gameFont = pygame.font.Font("assets/cmb10.ttf", 24)
+game_font = pygame.font.Font("assets/cmb10.ttf", 24)
 score_font = pygame.font.Font("assets/cmb10.ttf", 16)
 
-flagImage = pygame.image.load("assets/flag.png")
-flagImage = pygame.transform.scale(flagImage, (blockSize, blockSize))
+flag_image = pygame.image.load("assets/flag.png")
+flag_image = pygame.transform.scale(flag_image, (blocksize, blocksize))
 
-blockImage = pygame.image.load("assets/block.png")
-blockImage = pygame.transform.scale(blockImage, (blockSize, blockSize))
+block_image = pygame.image.load("assets/block.png")
+block_image = pygame.transform.scale(block_image, (blocksize, blocksize))
 
 running = True
-startMenuRunning = True
-firstClick = True
+first_click = True
 
-def startMenu():
-    global startMenuRunning
-    while startMenuRunning:
-        screen.fill(grey)
-        textSurface = gameFont.render("Minesweeper", True, black)
-        textRect = textSurface.get_rect(center=(windWidth // 2, windHeight // 2))
-        screen.blit(textSurface, textRect)
-        button = pygame.draw.rect(screen,pink,[windWidth/3,windHeight/1.5,160,60])
-        pygame.display.flip()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            elif event.type == pygame.MOUSEBUTTONDOWN: 
-                if event.button == LEFT:
-                    if button.collidepoint(event.pos):
-                        print("Button clicked!")
-                        startMenuRunning = False
-
-grid = [[grey for _ in range(windWidth // blockSize)] for _ in range(windHeight // blockSize)]
-adjacentCounts = [[0 for _ in range(windWidth // blockSize)] for _ in range(windHeight // blockSize)]
-leftClicked = [[False for _ in range(windWidth // blockSize)] for _ in range(windHeight // blockSize)]
+grid = [[grey for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
+adjacent_counts = [[0 for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
+left_clicked = [[False for _ in range(windwidth // blocksize)] for _ in range(windheight // blocksize)]
 
 def drawGrid():
-    for x in range(0, windHeight, blockSize):
-        for y in range(0, windWidth, blockSize):
-            rect = pygame.Rect(x, y, blockSize, blockSize)
-            colour = grid[y // blockSize][x // blockSize]
+    for x in range(0, windheight, blocksize):
+        for y in range(0, windwidth, blocksize):
+            rect = pygame.Rect(x, y, blocksize, blocksize)
+            colour = grid[y // blocksize][x // blocksize]
             pygame.draw.rect(screen, colour, rect)
-            pygame.draw.rect(screen, kindaDarkGrey, rect, 1)
-            if grid[y // blockSize][x // blockSize] == darkGrey:
-                count = adjacentCounts[y // blockSize][x // blockSize]
+            pygame.draw.rect(screen, kinddarkgrey, rect, 1)
+            if grid[y // blocksize][x // blocksize] == darkgrey:
+                count = adjacent_counts[y // blocksize][x // blocksize]
                 if count > 0:
-                    textColour = getCountColour(count)
+                    text_colour = get_count_colour(count)
                     font = pygame.font.Font(None, 24)
-                    text = font.render(str(count), True, textColour)
-                    screen.blit(text, (x + blockSize // 3, y + blockSize // 6))
-            elif grid[y // blockSize][x // blockSize] == pink:
-                screen.blit(flagImage, (x, y))
-            elif grid[y // blockSize][x // blockSize] == grey:
-                screen.blit(blockImage, (x, y))
+                    text = font.render(str(count), True, text_colour)
+                    screen.blit(text, (x + blocksize // 3, y + blocksize // 6))
+            elif grid[y // blocksize][x // blocksize] == pink:
+                screen.blit(flag_image, (x, y))
+            elif grid[y // blocksize][x // blocksize] == grey:
+                screen.blit(block_image, (x, y))
 
-def getCountColour(count):
+def get_count_colour(count):
     if count == 1:
         return blue
     elif count == 2:
@@ -98,9 +78,9 @@ def getCountColour(count):
     if count == 3:
         return red
     elif count == 4:
-        return darkBlue
+        return darkblue
     if count == 5:
-        return darkRed
+        return darkred
     elif count == 6:
         return teal
     if count == 7:
@@ -110,52 +90,56 @@ def getCountColour(count):
     else:
         return black
     
-def countAdjacentTargets(x, y):
+def count_adjacent_targets(x, y):
     count = 0
     for dx in range(-1, 2):
         for dy in range(-1, 2):
             if dx == 0 and dy == 0:
                 continue
             nx, ny = x + dx, y + dy
-            if 0 <= nx < windWidth // blockSize and 0 <= ny < windHeight // blockSize:
+            if 0 <= nx < windwidth // blocksize and 0 <= ny < windheight // blocksize:
                 if (nx, ny) in targets:
                     count += 1
     return count
 
-def revealSquare(x, y):
-    if not (0 <= x < windWidth // blockSize and 0 <= y < windHeight // blockSize):
+def reveal_square(x, y):
+    if not (0 <= x < windwidth // blocksize and 0 <= y < windheight // blocksize):
         return
-    if leftClicked[y][x]:
+    if left_clicked[y][x]:
         return
     
-    leftClicked[y][x] = True
-    adjacentCount = countAdjacentTargets(x, y)
-    adjacentCounts[y][x] = adjacentCount
-    grid[y][x] = darkGrey
+    left_clicked[y][x] = True
+    adjacent_count = count_adjacent_targets(x, y)
+    adjacent_counts[y][x] = adjacent_count
+    grid[y][x] = darkgrey
     
-    if adjacentCount == 0:
+    if adjacent_count == 0:
         for dx in range(-1, 2):
             for dy in range(-1, 2):
                 if dx != 0 or dy != 0:
-                    revealSquare(x + dx, y + dy)
+                    reveal_square(x + dx, y + dy)
 
-def placeTargets(excludeX, excludeY):
+def place_targets(exclude_x, exclude_y):
     global targets
     targets = []
-    while len(targets) < numTargets:
-        targetX = random.randint(0, windWidth // blockSize - 1)
-        targetY = random.randint(0, windHeight // blockSize - 1)
+    while len(targets) < num_targets:
+        targetX = random.randint(0, windwidth // blocksize - 1)
+        targetY = random.randint(0, windheight // blocksize - 1)
         target = (targetX, targetY)
 
-        if target not in targets and target != (excludeX, excludeY):
+        if target not in targets and target != (exclude_x, exclude_y):
             targets.append(target)
             
 def gamefailed():
     global running
+    score_text = str(score)
     screen.fill(grey)
-    textSurface = gameFont.render("Game Over", True, black)
-    textRect = textSurface.get_rect(center=(windWidth // 2, windHeight // 2))
-    screen.blit(textSurface, textRect)
+    text_surface = game_font.render("Game Over", True, black)
+    text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
+    score_image = score_font.render(f"Score : {score_text}", True, black)
+    score_rect = score_image.get_rect(center=(windwidth / 1.5, windheight / 1.5))
+    screen.blit(score_image, score_rect)
+    screen.blit(text_surface, text_rect)
     pygame.display.flip()
     
     while running:
@@ -165,16 +149,16 @@ def gamefailed():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:  # Optionally, add a restart feature
                 running = False
 
-def gameWon():
+def gamewon():
     global running, score
-    scoreText = str(score)
+    score_text = str(score)
     screen.fill(grey)
-    textSurface = gameFont.render("You Win!", True, black)
-    textRect = textSurface.get_rect(center=(windWidth // 2, windHeight // 2))
-    score_image = score_font.render(f"Score : {scoreText}", True, black)
-    score_rect = score_image.get_rect(center=(windWidth / 1.5, windHeight / 1.5))
+    text_surface = game_font.render("You Win!", True, black)
+    text_rect = text_surface.get_rect(center=(windwidth // 2, windheight // 2))
+    score_image = score_font.render(f"Score : {score_text}", True, black)
+    score_rect = score_image.get_rect(center=(windwidth / 1.5, windheight / 1.5))
     screen.blit(score_image, score_rect)
-    screen.blit(textSurface, textRect)
+    screen.blit(text_surface, text_rect)
     pygame.display.flip()
     
     while running:
@@ -191,46 +175,42 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouseX, mouseY = pygame.mouse.get_pos()
-            gridX = mouseX // blockSize
-            gridY = mouseY // blockSize
+            gridX = mouseX // blocksize
+            gridY = mouseY // blocksize
             
             if event.button == LEFT:
-                if firstClick:
-                    placeTargets(gridX, gridY)
-                    firstClick = False
-                if not leftClicked[gridY][gridX]:
+                if first_click:
+                    place_targets(gridX, gridY)
+                    first_click = False
+                if not left_clicked[gridY][gridX]:
                     if (gridX, gridY) in targets:
                         grid[gridY][gridX] = red
                         gamefailed()
                         break
                     else:
-                        revealSquare(gridX, gridY)
+                        reveal_square(gridX, gridY)
             elif event.button == RIGHT:
-                if firstClick:
-                    placeTargets(gridX, gridY)
-                    firstClick = False
-                if grid[gridY][gridX] == darkGrey:
+                if first_click:
+                    place_targets(gridX, gridY)
+                    first_click = False
+                if grid[gridY][gridX] == darkgrey:
                     print("Not possible to mark clicked square.")   
                 elif grid[gridY][gridX] != pink:
                     grid[gridY][gridX] = pink
                     print("Square marked!")
                     if ((gridX, gridY)) in targets:
                         score += 1
-                        print(score)
                 else:
                     grid[gridY][gridX] = grey
                     print("Target square unmarked!")
                     if ((gridX, gridY)) in targets:
                         score -= 1
-                        print(score)
-        elif score == numTargets:
-            gameWon()
+        elif score == num_targets:
+            gamewon()
 
     # Render game
-    startMenu()
-    # screen.fill(grey)
+    screen.fill(grey)
     drawGrid()
     pygame.display.flip()
 
 pygame.quit()
-
